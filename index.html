@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ujian Interaktif VLAN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    /* Proteksi visual sederhana */
+    .no-copy {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 no-copy flex flex-col justify-between" oncontextmenu="return false;">
+
+  <!-- HEADER -->
+  <header class="bg-indigo-700 text-white p-4 shadow-md sticky top-0 z-40">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="font-bold text-lg leading-tight">Ujian Online VLAN</h1>
+        <p class="text-xs text-indigo-200">Teknik Komputer & Jaringan</p>
+      </div>
+      <button onclick="openAdminModal()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1 border border-indigo-500 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        <span>Guru / Admin</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-md mx-auto w-full p-4 flex-grow mb-20">
+
+    <!-- SCREEN 1: LOGIN SISWA -->
+    <div id="screen-login" class="bg-white rounded-2xl shadow-xl p-6 space-y-5 border border-slate-200 mt-4">
+      <div class="text-center space-y-1">
+        <div class="inline-block p-3 bg-indigo-50 text-indigo-600 rounded-full mb-2">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">Masuk Ujian</h2>
+        <p class="text-xs text-slate-500">Pilih nama Anda sesuai daftar untuk memulai ujian</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wider">Nama Siswa</label>
+          <select id="select-student" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+            <option value="">-- Pilih Nama Anda --</option>
+          </select>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 space-y-1">
+          <div class="font-bold flex items-center space-x-1 text-amber-900">
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <span>Aturan Ujian:</span>
+          </div>
+          <ul class="list-disc list-inside space-y-0.5 text-amber-700">
+            <li>Layar HP akan otomatis menjadi <b>Full Screen</b>.</li>
+            <li><b>Dilarang</b> keluar aplikasi, pindah tab, atau membuka browser lain.</li>
+            <li>Maksimal pelanggaran: <b>3 kali</b> (jika melanggar, jawaban otomatis ter-submit).</li>
+          </ul>
+        </div>
+
+        <button onclick="startExam()" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] transition text-white font-semibold py-3.5 rounded-xl text-sm shadow-md flex justify-center items-center space-x-2">
+          <span>Mulai Kerjakan Ujian</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: LEMBAR UJIAN -->
+    <div id="screen-exam" class="hidden space-y-4">
+      <!-- Status & Timer Bar -->
+      <div class="bg-white rounded-xl shadow-sm p-3 border border-slate-200 flex justify-between items-center sticky top-16 z-30">
+        <div>
+          <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Peserta</div>
+          <div id="exam-student-name" class="font-bold text-xs text-indigo-900 truncate max-w-[140px]">Siswa</div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="text-right">
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Sisa Waktu</div>
+            <div id="timer-display" class="font-mono font-bold text-sm text-red-600">00:00</div>
+          </div>
+          <button onclick="toggleGridModal()" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-lg text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Card Soal -->
+      <div class="bg-white rounded-2xl shadow-sm p-5 border border-slate-200 space-y-4 min-h-[360px] flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">Soal No. <span id="current-question-num">1</span> dari 15</span>
+            <span id="cheat-warning" class="text-[10px] text-red-500 font-semibold hidden bg-red-50 px-2 py-0.5 rounded border border-red-200">Melanggar: <span id="cheat-count">0</span>/3</span>
+          </div>
+
+          <!-- Teks Soal -->
+          <div id="question-text" class="text-sm font-medium text-slate-800 leading-relaxed mb-4">
+            Loading...
+          </div>
+
+          <!-- Pilihan Jawaban -->
+          <div id="options-container" class="space-y-2.5">
+            <!-- Dynamic Render -->
+          </div>
+        </div>
+
+        <!-- Navigasi Bawah -->
+        <div class="flex justify-between items-center pt-4 border-t border-slate-100 mt-4">
+          <button id="btn-prev" onclick="navigateQuestion(-1)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <span>Sebelumnya</span>
+          </button>
+          
+          <button id="btn-next" onclick="navigateQuestion(1)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-1">
+            <span>Selanjutnya</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+
+          <button id="btn-submit" onclick="confirmSubmitExam()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-1">
+            <span>Selesai Ujian</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: HASIL SELESAI -->
+    <div id="screen-result" class="hidden bg-white rounded-2xl shadow-xl p-6 text-center space-y-4 border border-slate-200 mt-4">
+      <div class="inline-block p-4 bg-emerald-50 text-emerald-600 rounded-full">
+        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+      <h2 class="text-2xl font-bold text-slate-800">Ujian Selesai!</h2>
+      <p class="text-xs text-slate-500">Terima kasih telah menyelesaikan ujian ini secara jujur.</p>
+
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left space-y-2 text-xs">
+        <div class="flex justify-between"><span class="text-slate-500">Nama:</span> <span id="res-name" class="font-bold text-slate-800">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Waktu Selesai:</span> <span id="res-time" class="font-medium text-slate-800">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-500">Status Pelanggaran:</span> <span id="res-cheat" class="font-medium text-slate-800">-</span></div>
+      </div>
+
+      <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+        <div class="text-xs text-indigo-600 font-semibold uppercase tracking-wider">Nilai Akhir Anda</div>
+        <div id="res-score" class="text-4xl font-extrabold text-indigo-700 mt-1">0</div>
+        <div class="text-[10px] text-indigo-400 mt-1">Nilai telah dikirim dan tersimpan di sistem guru.</div>
+      </div>
+
+      <button onclick="logoutSiswa()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 rounded-xl text-xs transition">
+        Kembali ke Halaman Utama
+      </button>
+    </div>
+
+  </main>
+
+  <!-- MODAL: NAVIGASI GRID SOAL (Responsive Floating Overlay) -->
+  <div id="modal-grid" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 max-h-[80vh] flex flex-col justify-between">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+        <h3 class="font-bold text-sm text-slate-800">Navigasi Nomor Soal</h3>
+        <button onclick="toggleGridModal()" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Number Grid -->
+      <div id="grid-numbers" class="grid grid-cols-5 gap-2.5 overflow-y-auto p-1 max-h-[50vh]">
+        <!-- Dynamic Render -->
+      </div>
+
+      <div class="pt-2 text-xs flex justify-around text-slate-500 border-t border-slate-100">
+        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-indigo-600 rounded-full inline-block"></span> <span>Sedang Dibuka</span></div>
+        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span> <span>Sudah Dijawab</span></div>
+        <div class="flex items-center space-x-1"><span class="w-3 h-3 bg-slate-200 rounded-full inline-block"></span> <span>Belum Dijawab</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GURU / ADMIN PANEL -->
+  <div id="modal-admin" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Password Prompt Screen -->
+      <div id="admin-auth" class="space-y-4">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+          <h3 class="font-bold text-sm text-slate-800">Akses Panel Guru</h3>
+          <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <p class="text-xs text-slate-500">Masukkan PIN Guru untuk melihat hasil nilai & mengatur ujian.</p>
+        <div>
+          <input type="password" id="admin-pin" placeholder="Masukkan PIN (default: 12345)" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <p id="admin-pin-err" class="text-xs text-red-500 mt-1 hidden">PIN Salah!</p>
+        </div>
+        <button onclick="verifyAdminPIN()" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-xl text-xs">Masuk</button>
+      </div>
+
+      <!-- Admin Dashboard Screen -->
+      <div id="admin-dashboard" class="hidden space-y-5">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-sm text-slate-800">Panel Kontrol Guru</h3>
+            <p class="text-[10px] text-slate-400">Kelola Siswa & Hasil Ujian</p>
+          </div>
+          <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <!-- Setting Timer -->
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+          <label class="block text-xs font-semibold text-slate-700">Durasi Ujian (Menit):</label>
+          <div class="flex space-x-2">
+            <input type="number" id="setting-timer" value="15" min="1" max="180" class="w-full border border-slate-300 rounded-lg p-2 text-xs">
+            <button onclick="saveTimerSetting()" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">Simpan</button>
+          </div>
+        </div>
+
+        <!-- Rekap Nilai Siswa Table -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Rekap Hasil Ujian</h4>
+            <button onclick="exportResultsCSV()" class="text-[10px] text-indigo-600 font-semibold hover:underline">Unduh CSV</button>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto text-xs">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-slate-100 text-slate-600 sticky top-0 border-b border-slate-200">
+                <tr>
+                  <th class="p-2">Nama</th>
+                  <th class="p-2">Status</th>
+                  <th class="p-2">Nilai</th>
+                  <th class="p-2 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="admin-score-table" class="divide-y divide-slate-100">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Input / Edit Daftar Siswa -->
+        <div class="space-y-2">
+          <label class="block text-xs font-semibold text-slate-700">Daftar Siswa (Satu nama per baris):</label>
+          <textarea id="setting-student-list" rows="5" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+          <button onclick="saveStudentList()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 rounded-xl text-xs">Perbarui Daftar Siswa</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // DATA DEFAULT 17 SISWA & SOAL
+    // -------------------------------------------------------------
+    const DEFAULT_STUDENTS = [
+      "AKBAR",
+      "AKBAR RAHMAT ASMUDIN",
+      "DESIYANI",
+      "FAUZANAL AKRAM",
+      "LA ODE HAZI AL HAZA SUHARDIN",
+      "LA ODE WAHYUDIN",
+      "LASMI",
+      "MUH EKA SAPUTRA",
+      "MUHAMMAD REZA",
+      "NUR AIZYA",
+      "RISWAN",
+      "SAKINAH RAMADHANI",
+      "SUCI SEL",
+      "WA ODE BULAN RAMADHAN",
+      "WA ODE DERLIN SEPTIANA",
+      "WA ODE MARSYA MUHAJIR",
+      "WA ODE NURAISYAH AFIFAH"
+    ];
+
+    const EXAM_QUESTIONS = [
+      {
+        id: 1,
+        question: "Apa fungsi utama dari VLAN (Virtual Local Area Network) dalam sebuah jaringan komputer?",
+        options: [
+          "Mempercepat koneksi internet secara keseluruhan",
+          "Memecah satu jaringan fisik menjadi beberapa segmen jaringan logis secara terpisah",
+          "Menggantikan fungsi dari kabel UTP dengan gelombang radio",
+          "Menghubungkan jaringan lokal (LAN) ke internet publik tanpa router",
+          "Mengubah alamat MAC perangkat menjadi alamat IP secara otomatis"
+        ],
+        answer: 1
+      },
+      {
+        id: 2,
+        question: "Standar internasional yang mengatur mengenai pengoperasian VLAN (Virtual LAN) pada jaringan Ethernet adalah...",
+        options: [
+          "IEEE 802.3",
+          "IEEE 802.11",
+          "IEEE 802.1Q",
+          "IEEE 802.3ab",
+          "IEEE 802.1W"
+        ],
+        answer: 2
+      },
+      {
+        id: 3,
+        question: "Saat kita membuat VLAN dengan nomor ID 20 pada Switch Cisco, perintah mode global configuration yang tepat adalah...",
+        options: [
+          "switchport mode access vlan 20",
+          "interface vlan 20",
+          "vlan 20",
+          "set vlan 20",
+          "vlan database 20"
+        ],
+        answer: 2
+      },
+      {
+        id: 4,
+        question: "Apa fungsi dari port mode Access pada sebuah switch yang dikonfigurasi VLAN?",
+        options: [
+          "Menghubungkan switch dengan switch lain untuk membawa banyak VLAN",
+          "Menghubungkan switch ke perangkat akhir (End Device) seperti PC atau printer yang hanya berada pada satu VLAN",
+          "Menghubungkan jaringan ke router tanpa menggunakan metode trunking",
+          "Mengubah paket data dari tag menjadi untagged secara otomatis",
+          "Mengaktifkan protokol routing dinamis OSPF pada switch"
+        ],
+        answer: 1
+      },
+      {
+        id: 5,
+        question: "Perintah Cisco IOS apa yang digunakan untuk mengubah status port interface FastEthernet 0/1 menjadi mode akses?",
+        options: [
+          "switchport mode trunk",
+          "switchport access vlan 10",
+          "switchport mode access",
+          "vlan access 10",
+          "switchport trunk native vlan 10"
+        ],
+        answer: 2
+      },
+      {
+        id: 6,
+        question: "Perhatikan perintah berikut:<br><code class='bg-slate-100 px-1 py-0.5 rounded text-indigo-700 font-mono text-xs'>Switch(config)# interface range fastethernet 0/2 - 5<br>Switch(config-if-range)# switchport mode access<br>Switch(config-if-range)# switchport access vlan 30</code><br>Apa tujuan perintah di atas?",
+        options: [
+          "Mengonfigurasi port Fa0/2 sampai Fa0/5 sebagai port trunk untuk VLAN 30",
+          "Mengonfigurasi port Fa0/2 sampai Fa0/5 sebagai port akses untuk VLAN 30 secara bersamaan",
+          "Menghapus VLAN 30 dari port Fa0/2 sampai Fa0/5",
+          "Mengaktifkan routing inter-VLAN pada port Fa0/2 sampai Fa0/5",
+          "Membatasi bandwidth pada port Fa0/2 sampai Fa0/5 maksimal 30 Mbps"
+        ],
+        answer: 1
+      },
+      {
+        id: 7,
+        question: "Apa fungsi utama dari port mode Trunk pada switch?",
+        options: [
+          "Menghubungkan komputer klien ke switch",
+          "Menghubungkan printer jaringan ke switch utama",
+          "Membawa lalu lintas data dari beberapa VLAN yang berbeda melalui satu kabel fisik tunggal",
+          "Mengisolasi jaringan agar tidak bisa berkomunikasi dengan VLAN lain",
+          "Menjaga keamanan port agar tidak bisa diakses oleh perangkat asing"
+        ],
+        answer: 2
+      },
+      {
+        id: 8,
+        question: "Protokol enkapsulasi trunking apa yang bersifat standar terbuka (open standard) dan didukung oleh berbagai vendor switch?",
+        options: [
+          "ISL (Inter-Switch Link)",
+          "DTP (Dynamic Trunking Protocol)",
+          "VTP (VLAN Trunking Protocol)",
+          "802.1Q (Dot1q)",
+          "STP (Spanning Tree Protocol)"
+        ],
+        answer: 3
+      },
+      {
+        id: 9,
+        question: "Apa yang dimaksud dengan Native VLAN pada port trunk 802.1Q?",
+        options: [
+          "VLAN yang tidak memiliki alamat IP",
+          "VLAN yang trafik datanya dikirimkan tanpa diberi tag (untagged) pada link trunk",
+          "VLAN utama yang digunakan untuk manajemen remote switch",
+          "VLAN yang khusus untuk trafik voice over IP (VoIP)",
+          "VLAN cadangan jika VLAN utama mengalami kegagalan"
+        ],
+        answer: 1
+      },
+      {
+        id: 10,
+        question: "Jika dua komputer berada pada switch yang sama tetapi memiliki VLAN ID yang berbeda (VLAN 10 dan VLAN 20), bagaimana cara agar keduanya dapat berkomunikasi?",
+        options: [
+          "Cukup dengan menghubungkan kabel langsung antar komputer",
+          "Menggunakan perangkat Router atau Switch Layer 3 untuk melakukan Inter-VLAN Routing",
+          "Mengubah kedua port switch menjadi mode trunk",
+          "Mengganti kabel UTP standar dengan kabel Cross-Over",
+          "Menonaktifkan protokol Spanning Tree pada switch"
+        ],
+        answer: 1
+      },
+      {
+        id: 11,
+        question: "Perintah untuk melihat daftar VLAN yang aktif beserta port yang tergabung di dalamnya pada Cisco Switch adalah...",
+        options: [
+          "show running-config",
+          "show ip interface brief",
+          "show vlan brief",
+          "show vlan summary",
+          "show mac-address-table"
+        ],
+        answer: 2
+      },
+      {
+        id: 12,
+        question: "Apa kepanjangan dari VTP dalam konteks administrasi VLAN berbasis switch Cisco?",
+        options: [
+          "Virtual Trunking Protocol",
+          "VLAN Trunking Protocol",
+          "Voice Transfer Protocol",
+          "Virtual Terminal Program",
+          "VLAN Transport Provider"
+        ],
+        answer: 1
+      },
+      {
+        id: 13,
+        question: "Berapa rentang ID VLAN yang tersedia untuk penggunaan normal (Normal Range VLAN) pada switch Cisco?",
+        options: [
+          "1 hingga 1005",
+          "1006 hingga 4094",
+          "1 hingga 4096",
+          "0 hingga 1023",
+          "100 hingga 500"
+        ],
+        answer: 0
+      },
+      {
+        id: 14,
+        question: "Perhatikan perintah Router on a Stick:<br><code class='bg-slate-100 px-1 py-0.5 rounded text-indigo-700 font-mono text-xs'>Router(config-subif)# encapsulation dot1q 10</code><br>Apa fungsi dari perintah di atas?",
+        options: [
+          "Mengatur agar sub-interface mengenali dan memproses trafik data yang diberi tag VLAN 10",
+          "Mengaktifkan enkapsulasi ISL pada port fisik router",
+          "Menghubungkan router ke switch menggunakan port trunk",
+          "Mengatur alamat IP gateway untuk VLAN 10",
+          "Membatasi jumlah host maksimal di VLAN 10"
+        ],
+        answer: 0
+      },
+      {
+        id: 15,
+        question: "Mengapa VLAN sangat direkomendasikan dalam perancangan jaringan skala menengah hingga besar?",
+        options: [
+          "Karena dapat memperpanjang jarak maksimal kabel UTP hingga 500 meter",
+          "Karena dapat meningkatkan keamanan jaringan, mengurangi broadcast domain, dan mempermudah manajemen",
+          "Karena secara otomatis menaikkan kecepatan bandwidth ISP",
+          "Karena menghilangkan kebutuhan akan alamat IP lokal",
+          "Karena membuat semua perangkat berada dalam satu broadcast domain yang besar"
+        ],
+        answer: 1
+      }
+    ];
+
+    // -------------------------------------------------------------
+    // STATE MANAGEMENT
+    // -------------------------------------------------------------
+    let currentStudent = null;
+    let currentQuestionIndex = 0;
+    let userAnswers = Array(EXAM_QUESTIONS.length).fill(null);
+    let timerInterval = null;
+    let timeRemaining = 15 * 60; // default 15 menit (dalam detik)
+    let cheatCount = 0;
+    let isExamActive = false;
+
+    // -------------------------------------------------------------
+    // INITIALIZATION & LOCAL STORAGE HELPERS
+    // -------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      initStudents();
+      initTimerSetting();
+      setupAntiCheatListeners();
+    });
+
+    function getStoredStudents() {
+      const data = localStorage.getItem('vlan_students');
+      return data ? JSON.parse(data) : DEFAULT_STUDENTS;
+    }
+
+    function getStoredResults() {
+      const data = localStorage.getItem('vlan_results');
+      return data ? JSON.parse(data) : {};
+    }
+
+    function saveResults(results) {
+      localStorage.setItem('vlan_results', JSON.stringify(results));
+    }
+
+    function initStudents() {
+      const list = getStoredStudents();
+      const select = document.getElementById('select-student');
+      select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+      list.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+      document.getElementById('setting-student-list').value = list.join('\n');
+    }
+
+    function initTimerSetting() {
+      const duration = localStorage.getItem('vlan_timer_duration') || 15;
+      document.getElementById('setting-timer').value = duration;
+      timeRemaining = parseInt(duration) * 60;
+    }
+
+    // -------------------------------------------------------------
+    // EXAM FLOW LOGIC
+    // -------------------------------------------------------------
+    function startExam() {
+      const select = document.getElementById('select-student');
+      const studentName = select.value;
+
+      if (!studentName) {
+        alert('Silakan pilih nama Anda terlebih dahulu!');
+        return;
+      }
+
+      // Cek apakah siswa sudah pernah mengerjakan
+      const results = getStoredResults();
+      if (results[studentName] && results[studentName].completed) {
+        alert(`Siswa atas nama "${studentName}" telah menyelesaikan ujian ini sebelumnya.\nNilai: ${results[studentName].score}`);
+        return;
+      }
+
+      currentStudent = studentName;
+      document.getElementById('exam-student-name').textContent = studentName;
+
+      // Request Fullscreen
+      requestFullScreen();
+
+      // Reset state ujian
+      currentQuestionIndex = 0;
+      userAnswers = Array(EXAM_QUESTIONS.length).fill(null);
+      cheatCount = 0;
+      document.getElementById('cheat-count').textContent = '0';
+      document.getElementById('cheat-warning').classList.add('hidden');
+
+      // Setup Timer
+      const durationMin = parseInt(localStorage.getItem('vlan_timer_duration') || 15);
+      timeRemaining = durationMin * 60;
+      startTimer();
+
+      // Switch Screens
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('screen-exam').classList.remove('hidden');
+
+      isExamActive = true;
+      renderQuestion();
+      renderGridNumbers();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          alert('Waktu ujian telah habis!');
+          finishExam(true);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timeRemaining / 60);
+      const s = timeRemaining % 60;
+      document.getElementById('timer-display').textContent = 
+        `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function renderQuestion() {
+      const q = EXAM_QUESTIONS[currentQuestionIndex];
+      document.getElementById('current-question-num').textContent = currentQuestionIndex + 1;
+      document.getElementById('question-text').innerHTML = q.question;
+
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+
+      const labels = ['A', 'B', 'C', 'D', 'E'];
+      q.options.forEach((opt, idx) => {
+        const isSelected = userAnswers[currentQuestionIndex] === idx;
+        const btn = document.createElement('button');
+        btn.onclick = () => selectOption(idx);
+        btn.className = `w-full text-left p-3.5 rounded-xl border text-xs flex items-start space-x-3 transition active:scale-[0.99] ${
+          isSelected 
+            ? 'bg-indigo-50 border-indigo-600 text-indigo-900 font-semibold shadow-sm' 
+            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+        }`;
+
+        btn.innerHTML = `
+          <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
+            isSelected ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-300 text-slate-500'
+          }">${labels[idx]}</span>
+          <span class="pt-0.5 leading-relaxed">${opt}</span>
+        `;
+        container.appendChild(btn);
+      });
+
+      // Update Nav Buttons
+      document.getElementById('btn-prev').style.visibility = currentQuestionIndex === 0 ? 'hidden' : 'visible';
+      if (currentQuestionIndex === EXAM_QUESTIONS.length - 1) {
+        document.getElementById('btn-next').classList.add('hidden');
+        document.getElementById('btn-submit').classList.remove('hidden');
+      } else {
+        document.getElementById('btn-next').classList.remove('hidden');
+        document.getElementById('btn-submit').classList.add('hidden');
+      }
+
+      renderGridNumbers();
+    }
+
+    function selectOption(index) {
+      userAnswers[currentQuestionIndex] = index;
+      renderQuestion();
+    }
+
+    function navigateQuestion(direction) {
+      const newIndex = currentQuestionIndex + direction;
+      if (newIndex >= 0 && newIndex < EXAM_QUESTIONS.length) {
+        currentQuestionIndex = newIndex;
+        renderQuestion();
+      }
+    }
+
+    function toggleGridModal() {
+      const modal = document.getElementById('modal-grid');
+      modal.classList.toggle('hidden');
+    }
+
+    function renderGridNumbers() {
+      const grid = document.getElementById('grid-numbers');
+      grid.innerHTML = '';
+      EXAM_QUESTIONS.forEach((_, idx) => {
+        const isCurrent = idx === currentQuestionIndex;
+        const isAnswered = userAnswers[idx] !== null;
+
+        let bgClass = 'bg-slate-100 text-slate-600 border-slate-200';
+        if (isCurrent) {
+          bgClass = 'bg-indigo-600 text-white border-indigo-600 font-bold shadow';
+        } else if (isAnswered) {
+          bgClass = 'bg-emerald-500 text-white border-emerald-500 font-semibold';
+        }
+
+        const btn = document.createElement('button');
+        btn.className = `h-11 rounded-xl border text-xs flex items-center justify-center transition ${bgClass}`;
+        btn.textContent = idx + 1;
+        btn.onclick = () => {
+          currentQuestionIndex = idx;
+          renderQuestion();
+          toggleGridModal();
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    function confirmSubmitExam() {
+      const unanswered = userAnswers.filter(a => a === null).length;
+      let msg = 'Apakah Anda yakin ingin mengumpulkan jawaban?';
+      if (unanswered > 0) {
+        msg = `Masih ada ${unanswered} soal yang belum dijawab! Yakin ingin mengumpulkan?`;
+      }
+      if (confirm(msg)) {
+        finishExam(false);
+      }
+    }
+
+    function finishExam(forcedByTimerOrCheat = false) {
+      isExamActive = false;
+      clearInterval(timerInterval);
+
+      // Hitung skor
+      let correctCount = 0;
+      EXAM_QUESTIONS.forEach((q, idx) => {
+        if (userAnswers[idx] === q.answer) {
+          correctCount++;
+        }
+      });
+
+      const finalScore = Math.round((correctCount / EXAM_QUESTIONS.length) * 100);
+      const completionTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+      // Simpan Hasil ke LocalStorage
+      const results = getStoredResults();
+      results[currentStudent] = {
+        completed: true,
+        score: finalScore,
+        correct: correctCount,
+        total: EXAM_QUESTIONS.length,
+        cheats: cheatCount,
+        time: completionTime
+      };
+      saveResults(results);
+
+      // Tampilkan Layar Hasil
+      document.getElementById('screen-exam').classList.add('hidden');
+      document.getElementById('screen-result').classList.remove('hidden');
+
+      document.getElementById('res-name').textContent = currentStudent;
+      document.getElementById('res-time').textContent = completionTime;
+      document.getElementById('res-cheat').textContent = cheatCount > 0 ? `${cheatCount} kali terdeteksi` : 'Tidak ada (Jujur)';
+      document.getElementById('res-score').textContent = finalScore;
+
+      exitFullScreen();
+    }
+
+    function logoutSiswa() {
+      document.getElementById('screen-result').classList.add('hidden');
+      document.getElementById('screen-login').classList.remove('hidden');
+      document.getElementById('select-student').value = '';
+    }
+
+    // -------------------------------------------------------------
+    // ANTI-CHEAT SECURITY SYSTEM
+    // -------------------------------------------------------------
+    function requestFullScreen() {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) doc.requestFullscreen();
+      else if (doc.mozRequestFullScreen) doc.mozRequestFullScreen();
+      else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+      else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+    }
+
+    function exitFullScreen() {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+
+    function setupAntiCheatListeners() {
+      // Deteksi Pindah Tab / Buka Aplikasi Lain
+      document.addEventListener('visibilitychange', () => {
+        if (isExamActive && document.hidden) {
+          handleCheatViolation('Berpindah tab/aplikasi');
+        }
+      });
+
+      window.addEventListener('blur', () => {
+        if (isExamActive) {
+          handleCheatViolation('Meninggalkan area ujian');
+        }
+      });
+
+      // Mencegah Tombol Back & Shortcuts
+      window.addEventListener('keydown', (e) => {
+        if (isExamActive) {
+          if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
+            e.preventDefault();
+          }
+        }
+      });
+    }
+
+    function handleCheatViolation(reason) {
+      cheatCount++;
+      const warningEl = document.getElementById('cheat-warning');
+      const countEl = document.getElementById('cheat-count');
+
+      warningEl.classList.remove('hidden');
+      countEl.textContent = cheatCount;
+
+      if (cheatCount >= 3) {
+        alert(`PERINGATAN KERAS!\nAnda terdeteksi melanggar aturan (${reason}) sebanyak 3 kali.\nUjian Anda di-submit secara otomatis!`);
+        finishExam(true);
+      } else {
+        alert(`PERINGATAN (${cheatCount}/3)!\nDilarang ${reason} saat ujian berlangsung!\nJika mencapai 3x, ujian akan otomatis diberhentikan.`);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // SISI GURU / ADMIN LOGIC
+    // -------------------------------------------------------------
+    function openAdminModal() {
+      document.getElementById('modal-admin').classList.remove('hidden');
+      document.getElementById('admin-auth').classList.remove('hidden');
+      document.getElementById('admin-dashboard').classList.add('hidden');
+      document.getElementById('admin-pin').value = '';
+      document.getElementById('admin-pin-err').classList.add('hidden');
+    }
+
+    function closeAdminModal() {
+      document.getElementById('modal-admin').classList.add('hidden');
+    }
+
+    function verifyAdminPIN() {
+      const pin = document.getElementById('admin-pin').value;
+      if (pin === '6789') {
+        document.getElementById('admin-auth').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        renderAdminScoreTable();
+      } else {
+        document.getElementById('admin-pin-err').classList.remove('hidden');
+      }
+    }
+
+    function renderAdminScoreTable() {
+      const students = getStoredStudents();
+      const results = getStoredResults();
+      const tbody = document.getElementById('admin-score-table');
+      tbody.innerHTML = '';
+
+      students.forEach(name => {
+        const res = results[name];
+        const tr = document.createElement('tr');
+        
+        if (res && res.completed) {
+          tr.innerHTML = `
+            <td class="p-2 font-medium text-slate-800">${name}</td>
+            <td class="p-2 text-emerald-600 font-semibold">Selesai</td>
+            <td class="p-2 font-bold text-slate-800">${res.score}</td>
+            <td class="p-2 text-center">
+              <button onclick="resetStudentExam('${name}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2 py-1 rounded text-[10px] font-bold transition">
+                Reset
+              </button>
+            </td>
+          `;
+        } else {
+          tr.innerHTML = `
+            <td class="p-2 font-medium text-slate-600">${name}</td>
+            <td class="p-2 text-slate-400">Belum</td>
+            <td class="p-2 text-slate-400">-</td>
+            <td class="p-2 text-center"><span class="text-slate-300 text-[10px]">-</span></td>
+          `;
+        }
+        tbody.appendChild(tr);
+      });
+    }
+
+    function resetStudentExam(studentName) {
+      if (confirm(`Apakah Anda yakin ingin menghapus/mengulang status ujian untuk siswa "${studentName}"?\nSiswa dapat melakukan ujian kembali.`)) {
+        const results = getStoredResults();
+        delete results[studentName];
+        saveResults(results);
+        renderAdminScoreTable();
+        initStudents();
+      }
+    }
+
+    function saveTimerSetting() {
+      const val = document.getElementById('setting-timer').value;
+      if (val && val > 0) {
+        localStorage.setItem('vlan_timer_duration', val);
+        alert('Durasi ujian berhasil diperbarui menjadi ' + val + ' menit.');
+      }
+    }
+
+    function saveStudentList() {
+      const rawText = document.getElementById('setting-student-list').value;
+      const list = rawText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+      if (list.length === 0) {
+        alert('Daftar siswa tidak boleh kosong!');
+        return;
+      }
+      localStorage.setItem('vlan_students', JSON.stringify(list));
+      initStudents();
+      renderAdminScoreTable();
+      alert('Daftar siswa berhasil diperbarui!');
+    }
+
+    function exportResultsCSV() {
+      const students = getStoredStudents();
+      const results = getStoredResults();
+
+      let csvContent = "data:text/csv;charset=utf-8,Nama Siswa,Status,Nilai,Pelanggaran,Waktu Selesai\n";
+
+      students.forEach(name => {
+        const res = results[name];
+        if (res && res.completed) {
+          csvContent += `"${name}",Selesai,${res.score},${res.cheats},"${res.time}"\n`;
+        } else {
+          csvContent += `"${name}",Belum Ujian,-,-,-\n`;
+        }
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "Rekap_Nilai_VLAN.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
